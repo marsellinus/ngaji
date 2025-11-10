@@ -51,10 +51,61 @@ function sendResponse($status, $message, $data = null, $httpCode = 200) {
     exit;
 }
 
+// Handle GET request untuk health check
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    logToFile("INFO: Health check request dari IP=" . $_SERVER['REMOTE_ADDR']);
+    
+    // Test database connection
+    $db_status = 'connected';
+    $db_message = 'Database connection OK';
+    
+    try {
+        $testQuery = "SELECT COUNT(*) as total FROM santri";
+        $testResult = $conn->query($testQuery);
+        if ($testResult) {
+            $row = $testResult->fetch_assoc();
+            $total_santri = $row['total'];
+        } else {
+            throw new Exception('Query failed');
+        }
+        
+        $testQuery2 = "SELECT COUNT(*) as total FROM absensi WHERE DATE(waktu_absen) = CURDATE()";
+        $testResult2 = $conn->query($testQuery2);
+        if ($testResult2) {
+            $row2 = $testResult2->fetch_assoc();
+            $total_absen_hari_ini = $row2['total'];
+        } else {
+            $total_absen_hari_ini = 0;
+        }
+        
+    } catch (Exception $e) {
+        $db_status = 'error';
+        $db_message = 'Database error: ' . $e->getMessage();
+        $total_santri = 0;
+        $total_absen_hari_ini = 0;
+    }
+    
+    sendResponse('online', 'API Endpoint aktif dan siap menerima request', [
+        'version' => '1.0',
+        'server_time' => date('Y-m-d H:i:s'),
+        'database' => $db_status,
+        'database_message' => $db_message,
+        'statistics' => [
+            'total_santri' => $total_santri,
+            'absensi_hari_ini' => $total_absen_hari_ini
+        ],
+        'usage' => [
+            'method' => 'POST',
+            'parameter' => 'uid_kartu',
+            'example' => 'POST /api/absen.php dengan body: uid_kartu=A1B2C3D4'
+        ]
+    ]);
+}
+
 // Cek method POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     logToFile("ERROR: Invalid method - " . $_SERVER['REQUEST_METHOD']);
-    sendResponse('gagal', 'Method tidak diizinkan. Gunakan POST.', null, 405);
+    sendResponse('gagal', 'Method tidak diizinkan. Gunakan POST untuk absensi, GET untuk health check.', null, 405);
 }
 
 // Ambil data dari POST
