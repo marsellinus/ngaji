@@ -129,8 +129,8 @@ function requireAdmin() {
         if (!isLoggedIn()) {
             redirect('login.php?redirect=' . urlencode($_SERVER['REQUEST_URI']));
         } else {
-            // Logged in tapi bukan admin
-            showError('Akses ditolak! Halaman ini hanya untuk admin.');
+            // Logged in tapi bukan admin - redirect ke halaman santri
+            redirect('santri_log.php?error=' . urlencode('Akses ditolak! Halaman ini hanya untuk admin.'));
         }
     }
 }
