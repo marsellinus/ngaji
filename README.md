@@ -14,7 +14,12 @@ mysql -u root -p < database.sql
 ### 2. Akses Sistem
 
 ```
-URL: http://localhost/cc/public/login.php
+URL Utama: http://localhost/cc/
+
+Atau langsung:
+- Login: http://localhost/cc/public/login.php
+- Admin Dashboard: http://localhost/cc/public/index.php
+- Log Santri: http://localhost/cc/public/santri_log.php
 ```
 
 ## 🔐 Login

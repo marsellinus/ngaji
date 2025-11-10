@@ -1,21 +1,3 @@
--- ============================================
--- Database: db_ngaji
--- Sistem Absensi Ngaji dengan IoT ESP32
--- ============================================
--- 
--- CARA IMPORT:
--- 1. Buka phpMyAdmin: http://localhost/phpmyadmin
--- 2. Klik "Import" → Pilih file ini → Klik "Go"
--- 
--- ATAU via MySQL CLI:
--- mysql -u root -p < database.sql
--- 
--- AKUN DEFAULT:
--- Admin  : admin / admin123 (kelola sistem)
--- Santri : ahmad / admin123 (lihat log absensi mereka)
--- 
--- ============================================
-
 -- Buat database jika belum ada
 CREATE DATABASE IF NOT EXISTS db_ngaji;
 USE db_ngaji;
