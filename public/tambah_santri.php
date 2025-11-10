@@ -85,12 +85,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     elseif ($action === 'edit') {
         $id = (int)$_POST['id'];
         $nama = sanitizeInput($_POST['nama_santri']);
+        $rfid_id = sanitizeInput($_POST['rfid_id']);
         $kelas = sanitizeInput($_POST['kelas']);
         $keterangan = sanitizeInput($_POST['keterangan'] ?? '');
         
-        // Update data santri (RFID tidak bisa diubah untuk keamanan)
+        // Validasi input
+        if (isEmptyInput($nama) || isEmptyInput($rfid_id)) {
+            redirect('tambah_santri.php?error=Nama dan RFID ID harus diisi!');
+        }
+        
+        // Validasi format RFID
+        if (!isValidRFID($rfid_id)) {
+            redirect('tambah_santri.php?error=Format RFID tidak valid! Minimal 4 karakter alfanumerik.');
+        }
+        
+        // Cek apakah RFID sudah terdaftar oleh santri lain
+        $checkQuery = "SELECT id FROM santri WHERE rfid_id = '" . escape_string($conn, $rfid_id) . "' AND id != $id";
+        $checkResult = $conn->query($checkQuery);
+        
+        if ($checkResult->num_rows > 0) {
+            redirect('tambah_santri.php?error=RFID ID sudah terdaftar oleh santri lain!');
+        }
+        
+        // Update data santri (RFID sekarang bisa diubah)
         $updateQuery = "UPDATE santri 
                        SET nama_santri = '" . escape_string($conn, $nama) . "',
+                           rfid_id = '" . escape_string($conn, $rfid_id) . "',
                            kelas = '" . escape_string($conn, $kelas) . "',
                            keterangan = '" . escape_string($conn, $keterangan) . "'
                        WHERE id = $id";
@@ -196,12 +216,11 @@ include '../includes/header.php';
                     </label>
                     <input type="text" name="rfid_id" required
                            value="<?php echo $editData ? htmlspecialchars($editData['rfid_id']) : ''; ?>"
-                           <?php echo $editData ? 'readonly' : ''; ?>
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent <?php echo $editData ? 'bg-gray-100' : ''; ?>"
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                            placeholder="Contoh: A1B2C3D4">
                     <?php if ($editData): ?>
-                        <p class="text-xs text-gray-500 mt-1">
-                            <i class="fas fa-info-circle"></i> RFID ID tidak dapat diubah
+                        <p class="text-xs text-yellow-600 mt-1">
+                            <i class="fas fa-exclamation-triangle"></i> Hati-hati saat mengubah RFID ID - pastikan tidak duplikat!
                         </p>
                     <?php endif; ?>
                 </div>

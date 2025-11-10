@@ -53,7 +53,11 @@ const char* password = "82292112";       // <--- Ganti dengan password WiFi kamu
 // ============================================
 // KONFIGURASI SERVER
 // ============================================
-const char* serverURL = "https://cel.my.id/cc/absen.php";
+// PRODUCTION (butuh disable anti-bot protection di hosting):
+// const char* serverURL = "https://cel.my.id/cc/api/absen.php";
+
+// DEVELOPMENT (test local dulu):
+const char* serverURL = "http://10.225.159.41/cc/api/absen.php"; // IP laptop di WiFi karyameu
 
 // ============================================
 // PIN CONFIGURATION
@@ -112,11 +116,25 @@ void blinkRed(int times) {
   }
 }
 
+// PILIH SALAH SATU:
+// Uncomment yang sesuai dengan tipe buzzer Anda
+
+// === UNTUK ACTIVE BUZZER (5V) ===
 void beep(int duration) {
   digitalWrite(BUZZER_PIN, HIGH);
   delay(duration);
   digitalWrite(BUZZER_PIN, LOW);
 }
+
+// === UNTUK PASSIVE BUZZER (perlu PWM/tone) ===
+// Uncomment kode di bawah jika Active Buzzer tidak bunyi
+/*
+void beep(int duration) {
+  tone(BUZZER_PIN, 2000);  // 2000 Hz
+  delay(duration);
+  noTone(BUZZER_PIN);
+}
+*/
 
 void beepSuccess() { beep(100); }
 void beepError() { beep(100); delay(100); beep(100); }
@@ -141,6 +159,16 @@ void setup() {
   
   ledBlue();
   Serial.println("🔵 Booting...");
+  
+  // Test buzzer saat startup
+  Serial.println("Testing buzzer...");
+  for(int i = 0; i < 3; i++) {
+    digitalWrite(BUZZER_PIN, HIGH);
+    delay(100);
+    digitalWrite(BUZZER_PIN, LOW);
+    delay(100);
+  }
+  Serial.println("Buzzer test selesai.");
   
   SPI.begin(SCK_PIN, MISO_PIN, MOSI_PIN); 
   rfid.PCD_Init();
@@ -315,6 +343,11 @@ void sendToServer(String uid) {
     Serial.print("✅ Response Code: "); Serial.println(httpResponseCode);
     String response = http.getString();
     Serial.println("📥 Response:"); Serial.println(response);
+    
+    // Remove whitespace untuk parsing lebih akurat
+    response.replace(" ", "");
+    response.replace("\n", "");
+    response.replace("\r", "");
     
     // Parse response dari absen.php
     if (response.indexOf("\"status\":\"sukses\"") >= 0) {

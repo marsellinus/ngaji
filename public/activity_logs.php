@@ -67,7 +67,7 @@ if (!empty($params)) {
 $totalPages = ceil($totalRecords / $limit);
 
 // Get logs with pagination
-$query = "SELECT al.*, a.nama_lengkap, a.username, a.level
+$query = "SELECT al.*, a.nama_lengkap, a.username
           FROM activity_log al
           LEFT JOIN admin a ON al.admin_id = a.id
           $whereClause
@@ -234,7 +234,6 @@ include '../includes/header.php';
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Waktu</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Level</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipe Aktivitas</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Deskripsi</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">IP Address</th>
@@ -243,7 +242,7 @@ include '../includes/header.php';
             <tbody class="bg-white divide-y divide-gray-200">
                 <?php if ($resultLogs->num_rows == 0): ?>
                     <tr>
-                        <td colspan="7" class="px-6 py-8 text-center text-gray-500">
+                        <td colspan="6" class="px-6 py-8 text-center text-gray-500">
                             <i class="fas fa-inbox text-4xl mb-2"></i>
                             <p>Tidak ada data activity log</p>
                         </td>
@@ -259,9 +258,6 @@ include '../includes/header.php';
                                 <?php echo htmlspecialchars($log['nama_lengkap'] ?? 'System'); ?>
                                 <br>
                                 <span class="text-xs text-gray-500">@<?php echo htmlspecialchars($log['username'] ?? '-'); ?></span>
-                            </td>
-                            <td class="px-6 py-4 text-sm">
-                                <?php echo getLevelBadge($log['level'] ?? 'operator'); ?>
                             </td>
                             <td class="px-6 py-4 text-sm">
                                 <code class="bg-gray-100 px-2 py-1 rounded text-xs font-mono">

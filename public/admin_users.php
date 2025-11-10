@@ -301,7 +301,7 @@ include '../includes/header.php';
                                                 <i class="fas fa-edit text-lg"></i>
                                             </a>
                                             
-                                            <?php if ($row['id'] != $_SESSION['admin_id']): ?>
+                                            <?php if ($row['id'] != $_SESSION['user_id']): ?>
                                                 <a href="admin_users.php?hapus=<?php echo $row['id']; ?>" 
                                                    onclick="return confirm('Yakin ingin menghapus admin ini?')"
                                                    class="text-red-600 hover:text-red-800" title="Hapus">

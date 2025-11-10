@@ -25,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
     
-    logActivity($conn, $_SESSION['admin_id'], 'update_settings', 'Mengupdate pengaturan sistem');
+    logActivity($conn, $_SESSION['user_id'], 'update_settings', 'Mengupdate pengaturan sistem');
     redirect('settings.php?success=Pengaturan berhasil disimpan!');
 }
 

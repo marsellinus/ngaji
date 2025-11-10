@@ -15,7 +15,8 @@ $pageTitle = 'Profil Saya';
 // Require login
 requireLogin();
 
-$adminId = $_SESSION['admin_id'];
+// Get admin ID from session
+$adminId = $_SESSION['user_id'];
 $success = '';
 $error = '';
 
