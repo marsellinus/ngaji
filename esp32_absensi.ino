@@ -1,12 +1,12 @@
 /*
- * ESP32-C6 RFID Absensi System - FINAL & COMPLETE VERSION with LED STANDBY
+ * ESP32-C6 RFID Absensi System - FINAL VERSION with BLYNK IoT
  * 
- * Fitur Baru:
- * - LED status (hijau) akan mati secara otomatis setelah 30 detik tidak ada aktivitas.
- * - LED akan menyala kembali (kuning) saat kartu mulai di-scan.
+ * Fitur:
+ * - LED status standby (mati otomatis 30 detik)
  * - Support HTTP dan HTTPS
  * - Auto reconnect WiFi
- * - Endpoint disesuaikan dengan absen.php
+ * - Blynk IoT monitoring real-time
+ * - Remote LED control via Blynk
  * 
  * Hardware:
  * - ESP32-C6 Development Board
@@ -15,7 +15,8 @@
  * - Buzzer Speaker Active 5V
  * 
  * Library yang dibutuhkan:
- * - MFRC522 by GithubCommunity (install via Library Manager)
+ * - MFRC522 by GithubCommunity
+ * - Blynk by Volodymyr Shymanskyy (install via Library Manager)
  * 
  * Your Specific Pin Connection:
  * MFRC522 RFID Reader   -> ESP32-C6
@@ -43,6 +44,17 @@
 #include <WiFiClientSecure.h>
 #include <SPI.h>
 #include <MFRC522.h>
+#include <BlynkSimpleEsp32.h>
+
+// ============================================
+// KONFIGURASI BLYNK
+// ============================================
+#define BLYNK_TEMPLATE_ID "TMPL****"     // <--- Ganti dengan Template ID dari Blynk
+#define BLYNK_TEMPLATE_NAME "Absensi RFID"
+#define BLYNK_AUTH_TOKEN "****"          // <--- Ganti dengan Auth Token dari Blynk
+
+// Uncomment untuk debug Blynk
+// #define BLYNK_PRINT Serial
 
 // ============================================
 // KONFIGURASI WIFI
@@ -78,13 +90,16 @@ const char* serverURL = "http://10.225.159.41/cc/api/absen.php"; // IP laptop di
 #define BUZZER_PIN 21
 
 MFRC522 rfid(SS_PIN, RST_PIN);
+BlynkTimer timer;
 
 // ============================================
-// LOGIKA LED STANDBY (FITUR BARU)
+// LOGIKA LED STANDBY & BLYNK
 // ============================================
 unsigned long lastActivityTime = 0;       // Waktu aktivitas terakhir (scan kartu)
 bool isReadyLedOn = true;                 // Status apakah LED 'Ready' (hijau) sedang menyala
 const unsigned long LED_STANDBY_MS = 30000; // Waktu standby dalam milidetik (30 detik)
+int todayCount = 0;                       // Counter absensi hari ini
+bool blynkLedControl = false;             // Remote LED control dari Blynk
 
 // ============================================
 // FUNGSI LED DAN BUZZER
@@ -140,6 +155,30 @@ void beepSuccess() { beep(100); }
 void beepError() { beep(100); delay(100); beep(100); }
 
 // ============================================
+// BLYNK HANDLERS
+// ============================================
+
+// Blynk Virtual Pin V5 - Remote LED Control
+BLYNK_WRITE(V5) {
+  blynkLedControl = param.asInt();
+  if (blynkLedControl) {
+    ledGreen();
+    Serial.println("📱 LED dinyalakan dari Blynk");
+  } else {
+    ledOff();
+    Serial.println("📱 LED dimatikan dari Blynk");
+  }
+}
+
+// Update Blynk setiap 5 detik
+void updateBlynk() {
+  if (Blynk.connected()) {
+    Blynk.virtualWrite(V0, WiFi.status() == WL_CONNECTED ? "🟢 Online" : "🔴 Offline");
+    Blynk.virtualWrite(V4, todayCount);
+  }
+}
+
+// ============================================
 // SETUP
 // ============================================
 void setup() {
@@ -185,6 +224,25 @@ void setup() {
   
   connectWiFi();
   
+  // Initialize Blynk
+  Serial.println("📱 Connecting to Blynk...");
+  Blynk.config(BLYNK_AUTH_TOKEN);
+  Blynk.connect();
+  
+  if (Blynk.connected()) {
+    Serial.println("✅ Blynk Connected!");
+    Blynk.virtualWrite(V0, "🟢 Online");
+    Blynk.virtualWrite(V1, "Waiting...");
+    Blynk.virtualWrite(V2, "Waiting...");
+    Blynk.virtualWrite(V3, "Waiting...");
+    Blynk.virtualWrite(V4, 0);
+  } else {
+    Serial.println("⚠️ Blynk connection failed, continuing without Blynk...");
+  }
+  
+  // Setup timer untuk update Blynk setiap 5 detik
+  timer.setInterval(5000L, updateBlynk);
+  
   Serial.println("\n📡 Server Configuration:");
   Serial.print("URL: "); Serial.println(serverURL);
   
@@ -223,6 +281,9 @@ void connectWiFi() {
 // MAIN LOOP
 // ============================================
 void loop() {
+  Blynk.run();       // Run Blynk
+  timer.run();       // Run timer untuk update Blynk
+  
   // --- LOGIKA LED STANDBY (FITUR BARU) ---
   // Jika LED 'Ready' (hijau) sedang menyala dan sudah melewati waktu standby, matikan LED.
   if (isReadyLedOn && (millis() - lastActivityTime > LED_STANDBY_MS)) {
@@ -353,13 +414,47 @@ void sendToServer(String uid) {
     if (response.indexOf("\"status\":\"sukses\"") >= 0) {
       Serial.println("✅ Absensi berhasil dicatat!");
       blinkGreen(3); beepSuccess();
+      todayCount++;
+      
+      // Update Blynk
+      if (Blynk.connected()) {
+        // Extract nama dari JSON response
+        int namaStart = response.indexOf("\"nama\":\"") + 8;
+        int namaEnd = response.indexOf("\"", namaStart);
+        String nama = response.substring(namaStart, namaEnd);
+        
+        Blynk.virtualWrite(V1, uid);
+        Blynk.virtualWrite(V2, nama);
+        Blynk.virtualWrite(V3, "✅ Berhasil");
+        Blynk.virtualWrite(V4, todayCount);
+        Blynk.logEvent("absensi_sukses", "Absensi: " + nama);
+      }
     } else if (response.indexOf("\"status\":\"sudah_absen\"") >= 0) {
       Serial.println("⚠️ Sudah absen hari ini!");
       ledYellow(); beepError();
       delay(1000);
+      
+      // Update Blynk
+      if (Blynk.connected()) {
+        int namaStart = response.indexOf("\"nama\":\"") + 8;
+        int namaEnd = response.indexOf("\"", namaStart);
+        String nama = response.substring(namaStart, namaEnd);
+        
+        Blynk.virtualWrite(V1, uid);
+        Blynk.virtualWrite(V2, nama);
+        Blynk.virtualWrite(V3, "⚠️ Sudah Absen");
+      }
     } else if (response.indexOf("\"status\":\"gagal\"") >= 0) {
       Serial.println("❌ Kartu tidak terdaftar!");
       blinkRed(3); beepError();
+      
+      // Update Blynk
+      if (Blynk.connected()) {
+        Blynk.virtualWrite(V1, uid);
+        Blynk.virtualWrite(V2, "Tidak Dikenal");
+        Blynk.virtualWrite(V3, "❌ Gagal");
+        Blynk.logEvent("kartu_tidak_terdaftar", "UID: " + uid);
+      }
     } else {
       Serial.println("❌ Response tidak dikenali!");
       blinkRed(2); beepError();

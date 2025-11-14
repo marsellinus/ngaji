@@ -52,10 +52,10 @@ INSERT INTO absensi (rfid_id, waktu_absen, status, keterangan) VALUES
 ('A1B2C3D4', '2025-11-09 08:00:00', 'Hadir', 'Datang tepat waktu'),
 ('E5F6G7H8', '2025-11-09 08:05:00', 'Hadir', 'Datang tepat waktu');
 
--- Index untuk performa query
-CREATE INDEX IF NOT EXISTS idx_rfid ON santri(rfid_id);
-CREATE INDEX IF NOT EXISTS idx_waktu ON absensi(waktu_absen);
-CREATE INDEX IF NOT EXISTS idx_status ON absensi(status);
+-- Index untuk performa query (compatible dengan MySQL 5.x)
+ALTER TABLE santri ADD INDEX idx_rfid (rfid_id);
+ALTER TABLE absensi ADD INDEX idx_waktu (waktu_absen);
+ALTER TABLE absensi ADD INDEX idx_status (status);
 
 -- ========================================
 -- TABEL ADMIN & SISTEM MANAGEMENT
@@ -115,9 +115,9 @@ INSERT INTO settings (setting_key, setting_value, setting_type, description) VAL
 ('allow_duplicate_daily', '0', 'boolean', 'Izinkan absen lebih dari 1x per hari'),
 ('maintenance_mode', '0', 'boolean', 'Mode maintenance');
 
--- Index untuk performa admin system
-CREATE INDEX IF NOT EXISTS idx_admin_username ON admin(username);
-CREATE INDEX IF NOT EXISTS idx_santri_username ON santri(username);
-CREATE INDEX IF NOT EXISTS idx_settings_key ON settings(setting_key);
-CREATE INDEX IF NOT EXISTS idx_activity_admin ON activity_log(admin_id);
-CREATE INDEX IF NOT EXISTS idx_activity_date ON activity_log(created_at);
+-- Index untuk performa admin system (compatible dengan MySQL 5.x)
+ALTER TABLE admin ADD INDEX idx_admin_username (username);
+ALTER TABLE santri ADD INDEX idx_santri_username (username);
+ALTER TABLE settings ADD INDEX idx_settings_key (setting_key);
+ALTER TABLE activity_log ADD INDEX idx_activity_admin (admin_id);
+ALTER TABLE activity_log ADD INDEX idx_activity_date (created_at);
