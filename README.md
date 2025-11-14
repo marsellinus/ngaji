@@ -248,16 +248,15 @@ Password: admin123
 ## 🛠️ Hardware Requirements
 
 ### ESP32-C6 + RFID Module
-| Komponen | Spesifikasi | Harga Estimasi |
-|----------|-------------|----------------|
-| **ESP32-C6 DevKit** | WiFi 6, Bluetooth 5.3 | Rp 80.000 |
-| **MFRC522 RFID Reader** | 13.56MHz, SPI | Rp 15.000 |
-| **RGB LED Common Cathode** | 10mm, 3 warna | Rp 5.000 |
-| **Buzzer Active 5V** | Piezo speaker | Rp 3.000 |
-| **Kartu RFID (10 pcs)** | Mifare 1K | Rp 20.000 |
-| **Resistor 220Ω (3 pcs)** | Untuk LED | Rp 1.000 |
-| **Kabel Jumper** | Male-Female | Rp 10.000 |
-| **Total** | - | **~Rp 134.000** |
+| Komponen | Spesifikasi |
+|----------|-------------|
+| **ESP32-C6 DevKit** | WiFi 6, Bluetooth 5.3 |
+| **MFRC522 RFID Reader** | 13.56MHz, SPI |
+| **RGB LED Common Cathode** | 10mm, 3 warna | 
+| **Buzzer Active 5V** | Piezo speaker | 
+| **Kartu RFID (10 pcs)** | Mifare 1K | 
+| **Resistor 220Ω (3 pcs)** | Untuk LED | 
+| **Kabel Jumper** | Male-Female | 
 
 ### 🔌 Pin Configuration (ESP32-C6)
 
