@@ -49,9 +49,9 @@
 // ============================================
 // KONFIGURASI BLYNK
 // ============================================
-#define BLYNK_TEMPLATE_ID "TMPL****"     // <--- Ganti dengan Template ID dari Blynk
+#define BLYNK_TEMPLATE_ID "TMPL6DH4DNzrE"
 #define BLYNK_TEMPLATE_NAME "Absensi RFID"
-#define BLYNK_AUTH_TOKEN "****"          // <--- Ganti dengan Auth Token dari Blynk
+#define BLYNK_AUTH_TOKEN "05hD447U-GLK_GfPCoOj1ZQR3IRyGJPC"
 
 // Uncomment untuk debug Blynk
 // #define BLYNK_PRINT Serial
@@ -59,7 +59,7 @@
 // ============================================
 // KONFIGURASI WIFI
 // ============================================
-const char* ssid = "karyameu";           // <--- Ganti dengan nama WiFi kamu
+const char* ssid = "wokwi";           // <--- Ganti dengan nama WiFi kamu
 const char* password = "82292112";       // <--- Ganti dengan password WiFi kamu
 
 // ============================================
