@@ -1,0 +1,10 @@
+.git
+.github
+logs
+*.md
+!README.md
+.env
+.htaccess
+test_api.html
+esp32_absensi.ino
+*.ino

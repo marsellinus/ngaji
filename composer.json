@@ -1,0 +1,33 @@
+{
+  "name": "marsellinus/ngaji-absensi",
+  "description": "Sistem Absensi IoT berbasis ESP32 dan RFID untuk TPQ/TPA",
+  "type": "project",
+  "keywords": [
+    "absensi",
+    "rfid",
+    "esp32",
+    "iot",
+    "vercel"
+  ],
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Marsellinus",
+      "email": "marsellinus@example.com"
+    }
+  ],
+  "require": {
+    "php": ">=7.4"
+  },
+  "require-dev": {},
+  "autoload": {
+    "files": [
+      "config/database.php",
+      "includes/functions.php",
+      "includes/auth.php"
+    ]
+  },
+  "scripts": {
+    "start": "php -S localhost:8000 -t ."
+  }
+}
